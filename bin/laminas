@@ -33,6 +33,18 @@ $config = $container->get('config')['laminas-cli'] ?? [];
 
 $version = strstr(Versions::getVersion('laminas/laminas-cli'), '@', true);
 
+$lazyLoad = false;
+
+$commands = $config['commands'] ?? [];
+
+if (file_exists('config/development.config.php')) {
+    $lazyLoad = true;
+
+    $commands = \Laminas\Stdlib\ArrayUtils::merge($commands, $config['commands-dev'] ?? []);
+}
+
 $application = new Application('laminas-cli', $version);
-$application->setCommandLoader(new ContainerCommandLoader($container, $config['commands'] ?? []));
+$application->setCommandLoader(
+    new ContainerCommandLoader($container, $commands, $lazyLoad)
+);
 $application->run();

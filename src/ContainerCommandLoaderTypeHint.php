@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Laminas\Cli;
 
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
 
 use function array_keys;
@@ -26,15 +27,26 @@ final class ContainerCommandLoaderTypeHint implements CommandLoaderInterface
     /** @var string[] */
     private $commandMap;
 
-    public function __construct(ContainerInterface $container, array $commandMap)
+    /** @var bool */
+    private $lazyLoad;
+
+    public function __construct(ContainerInterface $container, array $commandMap, bool $lazyLoad)
     {
         $this->container = $container;
         $this->commandMap = $commandMap;
+        $this->lazyLoad = $lazyLoad;
     }
 
-    public function get(string $name) : LazyLoadingCommand
+    public function get(string $name) : Command
     {
-        return new LazyLoadingCommand($name, $this->commandMap[$name], $this->container);
+        if ($this->lazyLoad) {
+            return new LazyLoadingCommand($name, $this->commandMap[$name], $this->container);
+        }
+
+        $command = $this->container->get($this->commandMap[$name]);
+        $command->setName($name);
+
+        return $command;
     }
 
     public function has(string $name) : bool
