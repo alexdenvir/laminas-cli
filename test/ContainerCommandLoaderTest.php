@@ -38,7 +38,7 @@ class ContainerCommandLoaderTest extends TestCase
             ->with(TestAsset\ExampleCommand::class)
             ->willReturn(new TestAsset\ExampleCommand());
 
-        $loader = new ContainerCommandLoader($container, $commands);
+        $loader = new ContainerCommandLoader($container, $commands, false);
 
         $command = $loader->get('foo-bar-command');
 
@@ -55,7 +55,7 @@ class ContainerCommandLoaderTest extends TestCase
 
         $config = $container->get('ApplicationConfig');
 
-        $loader = new ContainerCommandLoader($container, $config['laminas-cli']['commands']);
+        $loader = new ContainerCommandLoader($container, $config['laminas-cli']['commands'], true);
 
         $command = $loader->get('example:command-with-deps');
 
